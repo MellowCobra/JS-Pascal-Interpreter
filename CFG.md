@@ -12,7 +12,11 @@ Terminals:
 Grammar:
 
 expr    : term ((PLUS|MINUS) term)*
+
 term    : power ((MUL|DIV) power)*
+
 power   : factor (POW factor)*
+
 factor  : INT
+
         | LPR expr RPR
