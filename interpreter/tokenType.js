@@ -3,7 +3,7 @@ const TokenType = {
     MINUS: '-',
     MUL: '*',
     DIV: '/',
-    POW: '^',
+    // POW: '^',
     LPR: '(',
     RPR: ')',
     INT: 'int',

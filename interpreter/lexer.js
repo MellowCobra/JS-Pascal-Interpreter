@@ -46,9 +46,9 @@ class Lexer {
             } else if (this.currentChar === '/') { 
                 this.advance()
                 return new Token(TokenType.DIV)
-            } else if (this.currentChar === '^') {
-                this.advance()
-                return new Token(TokenType.POW)
+            // } else if (this.currentChar === '^') {
+            //     this.advance()
+            //     return new Token(TokenType.POW)
             } else if (this.currentChar === '(') {
                 this.advance()
                 return new Token(TokenType.LPR)
@@ -56,7 +56,7 @@ class Lexer {
                 this.advance()
                 return new Token(TokenType.RPR)
             } else {
-                throw new Error(`Unknown token ${this.currentChar} at position ${this.position}`)
+                throw new Error(`Unknown token "${this.currentChar}" at position ${this.position}`)
             }
         }
 

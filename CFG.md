@@ -3,7 +3,6 @@ Terminals:
 * MINUS `-`
 * MUL `*`
 * DIV `/`
-* POW `^`
 * LPR `(`
 * RPR `)`
 * INT `[0..9]*`
@@ -12,7 +11,7 @@ Terminals:
 Grammar:
 
     expr    : term ((PLUS|MINUS) term)*
-    term    : power ((MUL|DIV) power)*
-    power   : factor (POW factor)*
-    factor  : INT
+    term    : factor ((MUL|DIV) factor)*
+    factor  : (PLUS|MINUS) expr
+            | INT
             | LPR expr RPR

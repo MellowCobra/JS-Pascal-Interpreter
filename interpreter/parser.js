@@ -1,6 +1,7 @@
 const Lexer = require('./lexer')
 const Token = require('./token')
 const TokenType = require('./tokenType')
+const { AST, BinOp, UnaryOp, Num } = require('./ast')
 
 class Parser {
     constructor(program) {
@@ -38,19 +39,14 @@ class Parser {
                 throw new Error(`Unmatched token: expected one of ${JSON.stringify(expected)} but got "${token.type}"`)
             }
 
-            let right = this.term()
-            if (token.type === TokenType.PLUS) {
-                result += right
-            } else if (token.type === TokenType.MINUS) {
-                result -= right
-            }
+            result = new BinOp(token, result, this.term())
         }
 
         return result
     }
 
     term() {
-        let result = this.power()
+        let result = this.factor()
 
         while (this.currentToken.type === TokenType.MUL || this.currentToken.type === TokenType.DIV) {
             let token = this.currentToken
@@ -67,26 +63,7 @@ class Parser {
                 throw new Error(`Unmatched token: expected one of ${JSON.stringify(expected)} but got "${token.type}"`)
             }
 
-            let right = this.power()
-            if (token.type === TokenType.MUL) {
-                result *= right
-            } else if (token.type === TokenType.DIV) {
-                result /= right
-            }
-        }
-
-        return result
-    }
-
-    power() {
-        let result = this.factor()
-
-        while(this.currentToken.type === TokenType.POW) {
-            let token = this.currentToken
-            this.eat(TokenType.POW)
-            let right = this.factor()
-
-            result = Math.pow(result, right)
+            result = new BinOp(token, result, this.factor())
         }
 
         return result
@@ -95,9 +72,17 @@ class Parser {
     factor() {
         let token = this.currentToken
 
-        if (token.type === TokenType.INT) {
+        if (token.type === TokenType.PLUS || token.type === TokenType.MINUS) {
+            if (token.type === TokenType.PLUS) {
+                this.eat(TokenType.PLUS)
+            } else if (token.type === TokenType.MINUS) {
+                this.eat(TokenType.MINUS)
+            }
+
+            return new UnaryOp(token, this.expr())
+        } else if (token.type === TokenType.INT) {
             this.eat(TokenType.INT)
-            return token.value
+            return new Num(token)
         } else if (token.type === TokenType.LPR) {
             this.eat(TokenType.LPR)
             let result = this.expr()
