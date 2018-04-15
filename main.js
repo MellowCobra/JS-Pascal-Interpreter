@@ -14,7 +14,9 @@ rl.on("line", line => {
         rl.close()
     } else if (line.toLowerCase() === "help") {
         console.log("This is a super simple REPL for my JS interpreter.")
-        console.log("type in an integer arithmetic expression, or 'quit' to exit")
+        console.log("Enter a simple program with only statement blocks and basic variable assignments with integer expressions")
+        console.log("For example: 'BEGIN a := 3 + -5; b := 42; c := a * (b + 35 / 7) END.'")
+        console.log("Or you can quit with the command 'quit'")
         process.stdout.write(">>> ")
     } else {
         // let parser = new Parser(line)
@@ -25,7 +27,7 @@ rl.on("line", line => {
         let interpreter = new Interpreter(line)
         result = interpreter.interpret()
     
-        console.log(interpreter.GLOBAL_SCOPE)
+        console.log("Symbol table:", JSON.stringify(interpreter.GLOBAL_SCOPE, null, 4))
         process.stdout.write(">>> ")
     }
 })
