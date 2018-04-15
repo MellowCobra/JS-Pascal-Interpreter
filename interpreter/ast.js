@@ -27,9 +27,43 @@ class Num extends Node {
     }
 }
 
+class Compound extends Node {
+    constructor() {
+        super()
+        this.children = []
+    }
+}
+
+class Assign extends Node {
+    constructor(token, left, right) {
+        super()
+        this.left = left
+        this.token = this.op = token
+        this.right = right
+    }
+}
+
+class Var extends Node {
+    constructor(token) {
+        super()
+        this.token = token
+        this.value = token.value
+    }
+}
+
+class NoOp extends Node {
+    constructor() {
+        super()
+    }
+}
+
 module.exports = {
     Node,
     BinOp,
     UnaryOp,
-    Num
+    Num,
+    Compound,
+    Assign,
+    Var,
+    NoOp
 }

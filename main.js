@@ -25,7 +25,7 @@ rl.on("line", line => {
         let interpreter = new Interpreter(line)
         result = interpreter.interpret()
     
-        console.log(JSON.stringify(result,null,4))
+        console.log(interpreter.GLOBAL_SCOPE)
         process.stdout.write(">>> ")
     }
 })
