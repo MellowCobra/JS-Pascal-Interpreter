@@ -21,9 +21,13 @@ String.prototype.isWhitespace = function() {
 }
 
 const Reserved = {
+    "PROGRAM": new Token(TokenType.PROGRAM),
+    "VAR": new Token(TokenType.VAR),
+    "DIV": new Token(TokenType.IDIV),
+    "INTEGER": new Token(TokenType.INTEGER),
+    "REAL": new Token(TokenType.REAL),
     "BEGIN": new Token(TokenType.BEGIN),
     "END": new Token(TokenType.END),
-    "DIV": new Token(TokenType.IDIV)
 }
 
 class Lexer {
@@ -46,11 +50,25 @@ class Lexer {
     getNextToken() {
         while (this.currentChar != NULLCHAR) {
             if (this.currentChar.isNumeric()) {
-                return new Token(TokenType.INT, this.integer())
+                return this.number()
             } else if (this.currentChar.isAlphabetic()) {
                 return this._id()
             } else if (this.currentChar.isWhitespace()) {
                 this.skipWhitespace()
+            } else if (this.currentChar === '{') {
+                this.advance()
+                this.skipComment()
+                continue
+            } else if (this.currentChar === ':' && this.peek() === '=') {
+                this.advance()
+                this.advance()
+                return new Token(TokenType.ASSIGN)
+            } else if (this.currentChar === ':') {
+                this.advance()
+                return new Token(TokenType.COLON)
+            } else if (this.currentChar === ',') {
+                this.advance()
+                return new Token(TokenType.COMMA)
             } else if (this.currentChar === '+') {
                 this.advance()
                 return new Token(TokenType.PLUS)
@@ -63,19 +81,12 @@ class Lexer {
             } else if (this.currentChar === '/') { 
                 this.advance()
                 return new Token(TokenType.DIV)
-            // } else if (this.currentChar === '^') {
-            //     this.advance()
-            //     return new Token(TokenType.POW)
             } else if (this.currentChar === '(') {
                 this.advance()
                 return new Token(TokenType.LPR)
             } else if (this.currentChar === ')') {
                 this.advance()
                 return new Token(TokenType.RPR)
-            } else if (this.currentChar === ':' && this.peek() === '=') {
-                this.advance()
-                this.advance()
-                return new Token(TokenType.ASSIGN)
             } else if (this.currentChar === ';') {
                 this.advance()
                 return new Token(TokenType.SEMI)
@@ -106,20 +117,39 @@ class Lexer {
         return new Token(TokenType.ID, identifier)
     }
 
-    integer() {
+    number() {
         let value = ""
-        while (this.currentChar != NULLCHAR && this.currentChar.isNumeric()) {
+        while (this.currentChar !== NULLCHAR && this.currentChar.isNumeric()) {
             value += this.currentChar
             this.advance()
         }
 
-        return parseInt(value,10)
+        if (this.currentChar === '.') {
+            value += this.currentChar
+            this.advance()
+
+            while (this.currentChar !== NULLCHAR && this.currentChar.isNumeric()) {
+                value += this.currentChar
+                this.advance()
+            }
+
+            return new Token(TokenType.REALC, parseFloat(value))
+        }
+
+        return new Token(TokenType.INTC, parseInt(value,10))
     }
 
     skipWhitespace() {
         while (this.currentChar != NULLCHAR && this.currentChar.isWhitespace()) {
             this.advance()
         }
+    }
+
+    skipComment() {
+        while (this.currentChar !== '}') {
+            this.advance()
+        }
+        this.advance()
     }
 
     peek() {

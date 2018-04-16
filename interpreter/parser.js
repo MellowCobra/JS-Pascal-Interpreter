@@ -9,7 +9,11 @@ const {
     Compound,
     Assign,
     Var,
-    NoOp
+    NoOp,
+    Program,
+    Block,
+    VarDecl,
+    Type
 } = require('./ast')
 
 class Parser {
@@ -29,9 +33,82 @@ class Parser {
     }
 
     program() {
-        let node = this.compound_statement()
+        // program : PROGRAM variable SEMI block DOT
+        this.eat(TokenType.PROGRAM)
+
+        let varNode = this.variable()
+        let name = varNode.value
+
+        this.eat(TokenType.SEMI)
+
+        let blockNode = this.block()
+        let programNode = new Program(name, blockNode)
+
         this.eat(TokenType.DOT)
-        return node
+        return programNode
+    }
+
+    block() {
+        // block : declarations compound_statement
+
+        const declarationNodes = this.declarations()
+        const compoundStatementNode = this.compound_statement()
+        return new Block(declarationNodes, compoundStatementNode)
+    }
+
+    declarations() {
+        // declarations : VAR (variable_declaration SEMI)+
+        //              | empty
+
+        let declarations = []
+        if (this.currentToken.type === TokenType.VAR) {
+            this.eat(TokenType.VAR)
+            while (this.currentToken.type === TokenType.ID) {
+                declarations = declarations.concat(this.variable_declaration())
+                this.eat(TokenType.SEMI)
+            }
+        }
+        return declarations
+    }
+
+    variable_declaration() {
+        // variable_declaration : ID (COMMA ID)* COLON type_spec
+
+        let varNodes = [new Var(this.currentToken)]
+        this.eat(TokenType.ID)
+
+        while (this.currentToken.type === TokenType.COMMA) {
+            this.eat(TokenType.COMMA)
+            varNodes.push(new Var(this.currentToken))
+            this.eat(TokenType.ID)
+        }
+
+        this.eat(TokenType.COLON)
+
+        let typeNode = this.type_spec()
+        let varDeclarations = varNodes.map( vNode => new VarDecl(vNode, typeNode))
+
+        return varDeclarations
+    }
+
+    type_spec() {
+        // type_spec : INTEGER
+        //           | REAL
+
+        let token = this.currentToken
+        if (token.type === TokenType.INTEGER) {
+            this.eat(TokenType.INTEGER)
+        } else if (token.type === TokenType.REAL) {
+            this.eat(TokenType.REAL)
+        } else {
+            const expected = [
+                TokenType.INTEGER,
+                TokenType.REAL
+            ]
+            throw new Error(`Unmatched token; expected one of ${JSON.stringify(expected)} but got ${token.type}`)
+        }
+
+        return new Type(token)
     }
 
     compound_statement() {
@@ -122,6 +199,8 @@ class Parser {
     }
 
     term() {
+        // term : factor (( MUL | IDIV | DIV ) factor)*
+
         let result = this.factor()
 
         while (this.currentToken.type === TokenType.MUL || 
@@ -151,6 +230,13 @@ class Parser {
     }
 
     factor() {
+        // factor : PLUS factor
+        //        | MINUS factor
+        //        | INTC
+        //        | REALC
+        //        | LPR expr RPR
+        //        | variable
+
         let token = this.currentToken
 
         if (token.type === TokenType.PLUS) {
@@ -159,8 +245,11 @@ class Parser {
         } if (token.type === TokenType.MINUS) {
             this.eat(TokenType.MINUS)
             return new UnaryOp(token, this.expr())
-        } else if (token.type === TokenType.INT) {
-            this.eat(TokenType.INT)
+        } else if (token.type === TokenType.INTC) {
+            this.eat(TokenType.INTC)
+            return new Num(token)
+        } else if (token.type === TokenType.REALC) {
+            this.eat(TokenType.REALC)
             return new Num(token)
         } else if (token.type === TokenType.LPR) {
             this.eat(TokenType.LPR)

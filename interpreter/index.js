@@ -6,7 +6,11 @@ const {
     Compound,
     Assign,
     Var,
-    NoOp
+    NoOp,
+    Program,
+    Block,
+    VarDecl,
+    Type
 } = require('./ast')
 const Parser = require('./parser')
 const Token = require('./token')
@@ -30,6 +34,14 @@ class NodeVisitor {
             return this.visit_Var(node)
         } else if (node instanceof NoOp) {
             return this.visit_NoOp(node)
+        } else if (node instanceof Program) {
+            return this.visit_Program(node)
+        } else if (node instanceof Block) {
+            return this.visit_Block(node)
+        } else if (node instanceof VarDecl) {
+            return this.visit_VarDecl(node)
+        } else if (node instanceof Type) {
+            return this.visit_Type(node)
         } else {
             throw new Error(`No visit_{} method for node ${JSON.stringify(node)}`)
         }
@@ -58,7 +70,7 @@ class Interpreter extends NodeVisitor {
         } else if (op.type === TokenType.MUL) {
             return this.visit(node.left) * this.visit(node.right)
         } else if (op.type === TokenType.DIV) {
-            return this.visit(node.left) / this.visit(node.right)
+            return parseFloat(this.visit(node.left) / this.visit(node.right))
         } else if (op.type === TokenType.IDIV) {
             return parseInt(this.visit(node.left) / this.visit(node.right))
         }
@@ -99,6 +111,25 @@ class Interpreter extends NodeVisitor {
     }
 
     visit_NoOp(node) {
+        return
+    }
+
+    visit_Program(node) {
+        this.visit(node.block)
+    }
+
+    visit_Block(node) {
+        for (let i in node.declarations) {
+            this.visit(node.declarations[i])
+        }
+        this.visit(node.compoundStatement)
+    }
+
+    visit_VarDecl(node) {
+        return
+    }
+
+    visit_Type(node) {
         return
     }
 }

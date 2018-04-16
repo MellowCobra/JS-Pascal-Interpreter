@@ -57,6 +57,38 @@ class NoOp extends Node {
     }
 }
 
+class Program extends Node {
+    constructor(name, block) {
+        super()
+        this.name = name
+        this.block = block
+    }
+}
+
+class Block extends Node {
+    constructor(declarations, compoundStatement) {
+        super()
+        this.declarations = declarations
+        this.compoundStatement = compoundStatement
+    }
+}
+
+class VarDecl extends Node {
+    constructor(varNode, typeNode) {
+        super()
+        this.varNode = varNode
+        this.typeNode = typeNode
+    }
+}
+
+class Type extends Node {
+    constructor(token) {
+        super()
+        this.token = token,
+        this.value = token.value
+    }
+}
+
 module.exports = {
     Node,
     BinOp,
@@ -65,5 +97,9 @@ module.exports = {
     Compound,
     Assign,
     Var,
-    NoOp
+    NoOp,
+    Program,
+    Block,
+    VarDecl,
+    Type
 }
