@@ -1,37 +1,27 @@
-const Parser = require('./interpreter/parser')
-const Interpreter = require('./interpreter')
-
-const readline = require('readline')
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-})
-
-process.stdout.write(">>> ")
-
-rl.on("line", line => {
-    if (line.toLowerCase() === "quit") {
-        rl.close()
-    } else if (line.toLowerCase() === "help") {
-        console.log("This is a super simple REPL for my JS interpreter.")
-        console.log("Enter a simple program with only statement blocks and basic variable assignments with integer expressions")
-        console.log("For example: 'BEGIN a := 3 + -5; b := 42; c := a * (b + 35 / 7) END.'")
-        console.log("Or you can quit with the command 'quit'")
-        process.stdout.write(">>> ")
-    } else {
-        // let parser = new Parser(line)
-        // let result = parser.parse()
-
-        // console.log(JSON.stringify(result, null, 4))
-
-        let interpreter = new Interpreter(line)
-        result = interpreter.interpret()
-    
-        console.log("Symbol table:", JSON.stringify(interpreter.GLOBAL_SCOPE, null, 4))
-        process.stdout.write(">>> ")
-    }
-})
-
-rl.on("close", () => {
+if (process.argv.length < 3) {
+    console.log("Usage: node main.js <input_file_name>")
     process.exit()
-})
+}
+
+const inFileName = process.argv[2]
+const fs = require('fs')
+const program = fs.readFileSync(__dirname + "/" + inFileName, { encoding: 'utf8'})
+
+const Parser = require('./interpreter/parser')
+const { SymbolTableBuilder, Interpreter } = require('./interpreter')
+
+let parser = new Parser(program)
+let result = parser.parse()
+
+console.log(JSON.stringify(result, null, 4))
+
+let stBuilder = new SymbolTableBuilder()
+stBuilder.visit(result)
+console.log(stBuilder.symbolTable.toString())
+
+let interpreter = new Interpreter(program)
+result = interpreter.interpret()
+
+console.log("Memory after interpretation:", JSON.stringify(interpreter.GLOBAL_SCOPE, null,4))
+
+process.exit()
