@@ -13,10 +13,20 @@ Upon a successful parsing, the constructed AST of the program is printed out, fo
 
 Most errors are caught by the lexer and the parser. Feel free to open up an issue if you find some errors that I do not report accurately.
 
+## Installation
+* Install using npm: `npm install --global pascal-interpreter`
+* Alias the interpreter: `alias pascaljs="node /path/to/global/node_modules/pascal-interpreter/main.js"`
+* Alias the REPL: `alias pascaljs-repl="node /path/to/global/node_modules/pascal-interpreter/repl.js"`
+> Note: the path to the global node modules will be printed to the console after running the install
+
 ## Usage:
+### If in the source directory:
 * Run the REPL with `node repl.js`
 * Ask the REPL what it can do with `help`.
 * Exit the REPL with `quit`
 
 Or
 * Interpret a .pas program file with `node main.js <filename.pas>`
+### If aliased:
+* Run the REPL with `pascaljs-repl`
+* Interpret a .pas program file with `pascaljs <filename.pas>`
