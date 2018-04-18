@@ -12,6 +12,12 @@ const {
     VarDecl,
     Type
 } = require('./ast')
+const {
+    Symbol,
+    BuiltinTypeSymbol,
+    VarSymbol
+} = require('./symbol')
+const SymbolTable = require('./symbolTable')
 const Parser = require('./parser')
 const Token = require('./token')
 const TokenType = require('./tokenType')
@@ -134,4 +140,77 @@ class Interpreter extends NodeVisitor {
     }
 }
 
-module.exports = Interpreter
+class SymbolTableBuilder extends NodeVisitor {
+    constructor() {
+        super()
+        this.symbolTable = new SymbolTable()
+    }
+
+    visit_Block(node) {
+        for (let i in node.declarations) {
+            this.visit(node.declarations[i])
+        }
+        this.visit(node.compoundStatement)
+    }
+
+    visit_Program(node) {
+        this.visit(node.block)
+    }
+
+    visit_BinOp(node) {
+        this.visit(node.left)
+        this.visit(node.right)
+    }
+
+    visit_Num(node) {
+        return
+    }
+
+    visit_UnaryOp(node) {
+        this.visit(node.operand)
+    }
+
+    visit_Compound(node) {
+        for (let i in node.children) {
+            this.visit(node.children[i])
+        }
+    }
+
+    visit_NoOp(node) {
+        return
+    }
+
+    visit_VarDecl(node) {
+        const typeName = node.typeNode.value
+        const typeSymbol = this.symbolTable.lookup(typeName)
+        const varName = node.varNode.value
+        const varSymbol = new VarSymbol(varName, typeSymbol)
+        this.symbolTable.define(varSymbol)
+    }
+
+    visit_Assign(node) {
+        const varName = node.left.value
+        const varSymbol = this.symbolTable.lookup(varName)
+        if (varSymbol == null) {
+            throw new Error(`No variable "${varName}" defined`)
+        }
+        this.visit(node.right)
+    }
+
+    visit_Var(node) {
+        const varName = node.value
+        const varSymbol = this.symbolTable.lookup(varName)
+        if (varSymbol == null) {
+            throw new Error(`No variable "${varName}" defined`)
+        }
+    }
+    
+    visit_Type(node) {
+        return
+    }
+}
+
+module.exports = {
+    Interpreter,
+    SymbolTableBuilder
+}

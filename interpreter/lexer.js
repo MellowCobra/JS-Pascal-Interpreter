@@ -21,13 +21,13 @@ String.prototype.isWhitespace = function() {
 }
 
 const Reserved = {
-    "PROGRAM": new Token(TokenType.PROGRAM),
-    "VAR": new Token(TokenType.VAR),
-    "DIV": new Token(TokenType.IDIV),
-    "INTEGER": new Token(TokenType.INTEGER),
-    "REAL": new Token(TokenType.REAL),
-    "BEGIN": new Token(TokenType.BEGIN),
-    "END": new Token(TokenType.END),
+    "PROGRAM": new Token(TokenType.PROGRAM, "PROGRAM"),
+    "VAR": new Token(TokenType.VAR, "VAR"),
+    "DIV": new Token(TokenType.IDIV, "DIV"),
+    "INTEGER": new Token(TokenType.INTEGER, "INTEGER"),
+    "REAL": new Token(TokenType.REAL, "REAL"),
+    "BEGIN": new Token(TokenType.BEGIN, "BEGIN"),
+    "END": new Token(TokenType.END, "END"),
 }
 
 class Lexer {
@@ -62,37 +62,37 @@ class Lexer {
             } else if (this.currentChar === ':' && this.peek() === '=') {
                 this.advance()
                 this.advance()
-                return new Token(TokenType.ASSIGN)
+                return new Token(TokenType.ASSIGN, ":=")
             } else if (this.currentChar === ':') {
                 this.advance()
-                return new Token(TokenType.COLON)
+                return new Token(TokenType.COLON, ":")
             } else if (this.currentChar === ',') {
                 this.advance()
-                return new Token(TokenType.COMMA)
+                return new Token(TokenType.COMMA, ",")
             } else if (this.currentChar === '+') {
                 this.advance()
-                return new Token(TokenType.PLUS)
+                return new Token(TokenType.PLUS, "+")
             } else if (this.currentChar === '-') {
                 this.advance()
-                return new Token(TokenType.MINUS)
+                return new Token(TokenType.MINUS, "-")
             } else if (this.currentChar === '*') {
                 this.advance()
-                return new Token(TokenType.MUL)
+                return new Token(TokenType.MUL, "*")
             } else if (this.currentChar === '/') { 
                 this.advance()
-                return new Token(TokenType.DIV)
+                return new Token(TokenType.DIV, "/")
             } else if (this.currentChar === '(') {
                 this.advance()
-                return new Token(TokenType.LPR)
+                return new Token(TokenType.LPR, "(")
             } else if (this.currentChar === ')') {
                 this.advance()
-                return new Token(TokenType.RPR)
+                return new Token(TokenType.RPR, ")")
             } else if (this.currentChar === ';') {
                 this.advance()
-                return new Token(TokenType.SEMI)
+                return new Token(TokenType.SEMI, ";")
             } else if (this.currentChar === '.') {
                 this.advance()
-                return new Token(TokenType.DOT)
+                return new Token(TokenType.DOT, ".")
             } else {
                 throw new Error(`Unknown token "${this.currentChar}" at position ${this.position}`)
             }
