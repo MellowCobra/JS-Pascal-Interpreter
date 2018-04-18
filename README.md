@@ -3,6 +3,8 @@
 
 WIP: Currently processes simple programs according to the grammar defined in [CFG.md](https://github.com/MellowCobra/JS-Pascal-Interpreter/blob/master/CFG.md)
 
+This Interpreter was built as a learning exercise following Ruslan Spivak's [Let's Build a Simple Interpreter](https://ruslanspivak.com/lsbasi-part1/) series.
+
 `repl.js` runs a basic REPL that can take simple programs on a single line, and parse and interpret them.
 
 `main.js` takes the relative path of the program input file as a command-line argument, and parses and interprets it.
@@ -15,5 +17,6 @@ Most errors are caught by the lexer and the parser. Feel free to open up an issu
 * Run the REPL with `node repl.js`
 * Ask the REPL what it can do with `help`.
 * Exit the REPL with `quit`
-## Or
+
+Or
 * Interpret a .pas program file with `node main.js <filename.pas>`
