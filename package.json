@@ -1,6 +1,6 @@
 {
   "name": "pascal-interpreter",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A lightweight interpreter for Pascal written in JavaScript",
   "main": "main.js",
   "scripts": {
