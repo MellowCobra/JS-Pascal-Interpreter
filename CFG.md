@@ -1,5 +1,6 @@
 Terminals:
 * PROGRAM `PROGRAM`
+* PROCEDURE `PROCEDURE`
 * BEGIN `BEGIN`
 * END `END` 
 * VAR `VAR`
@@ -30,7 +31,13 @@ Grammar:
     block                   : declarations compound_statements
 
     declarations            : VAR (variable_declaration SEMI)+
-                            : empty
+                            | (PROCEDURE ID (LPR formal_parameter_list RPR)? SEMI block SEMI)*
+                            | empty
+
+    formal_parameter_list   : formal_parameters
+                            | formal_parameters SEMI formal_parameter_list
+    
+    formal_parameters       : ID (COMMA ID)* COLON type_spec
 
     variable_declarations   : ID (COMMA ID)* COLON type_spec
 

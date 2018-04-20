@@ -1,5 +1,5 @@
 const Parser = require('./interpreter/parser')
-const { Interpreter, SymbolTableBuilder } = require('./interpreter')
+const { Interpreter, SemanticAnalyzer } = require('./interpreter')
 
 const readline = require('readline')
 const rl = readline.createInterface({
@@ -24,9 +24,8 @@ rl.on("line", line => {
 
         console.log(JSON.stringify(result, null, 4))
 
-        let stBuilder = new SymbolTableBuilder()
-        stBuilder.visit(result)
-        console.log(stBuilder.symbolTable.toString())
+        let semAnalyzer = new SemanticAnalyzer()
+        semAnalyzer.visit(result)
 
         let interpreter = new Interpreter(line)
         result = interpreter.interpret()

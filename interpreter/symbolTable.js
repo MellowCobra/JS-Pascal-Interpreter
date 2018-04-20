@@ -4,9 +4,12 @@ const {
     VarSymbol
 } = require('./symbol')
 
-class SymbolTable {
-    constructor() {
+class ScopedSymbolTable {
+    constructor(name, level, parent) {
         this._symbols = new Map()
+        this.scopeName = name
+        this.scopeLevel = level
+        this.enclosingScope = parent || null
         this.initBuiltinSymbols()
     }
 
@@ -23,19 +26,35 @@ class SymbolTable {
         this._symbols.forEach( entry => {
             symbols.push(entry)
         })
-        return "Symbols: " + symbols.join(', ')
+        return `\n\nScope (Scoped Symbol Table) 
+Scope Name: ${this.scopeName}
+Scope Level: ${this.scopeLevel}
+Enclosing Scope: ${ this.enclosingScope ? this.enclosingScope.scopeName : "None" }
+Scope contents: 
+    ${symbols.join(',\n    ')}\n\n`
     }
 
     define(symbol) {
         this._symbols.set(symbol.name, symbol)
-        console.log(`Define ${symbol}: ${this._symbols.get(symbol.name)}`)
+        console.log(`Define ${symbol}`)
+    }
+
+    contains(name) {
+        return this._symbols.has(name)
     }
 
     lookup(name) {
-        const res = this._symbols.get(name)
-        console.log(`Lookup ${name}: ${res}`)
-        return res
+        const symbol = this._symbols.get(name)
+        console.log(`Lookup ${name} in scope ${this.scopeName}: ${symbol}`)
+
+        if (symbol != null) {
+            return symbol
+        } else if (this.enclosingScope != null) {
+            return this.enclosingScope.lookup(name)
+        }
+
+        return null
     }
 }
 
-module.exports = SymbolTable
+module.exports = ScopedSymbolTable

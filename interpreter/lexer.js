@@ -28,6 +28,7 @@ const Reserved = {
     "REAL": new Token(TokenType.REAL, "REAL"),
     "BEGIN": new Token(TokenType.BEGIN, "BEGIN"),
     "END": new Token(TokenType.END, "END"),
+    "PROCEDURE": new Token(TokenType.PROCEDURE, "PROCEDURE"),
 }
 
 class Lexer {

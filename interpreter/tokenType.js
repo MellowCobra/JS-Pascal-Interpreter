@@ -1,5 +1,6 @@
 const TokenType = {
     PROGRAM: 'PROGRAM',
+    PROCEDURE: 'PROCEDURE',
     BEGIN: 'BEGIN',
     END: 'END',
     VAR: 'VAR',

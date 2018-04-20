@@ -13,7 +13,9 @@ const {
     Program,
     Block,
     VarDecl,
-    Type
+    Type,
+    ProcedureDecl,
+    Param
 } = require('./ast')
 
 class Parser {
@@ -58,9 +60,12 @@ class Parser {
 
     declarations() {
         // declarations : VAR (variable_declaration SEMI)+
+        //              | (PROCEDURE ID (LPR formal_parameter_list RPR)? SEMI block SEMI)*
         //              | empty
 
         let declarations = []
+
+        // Variable Declarations
         if (this.currentToken.type === TokenType.VAR) {
             this.eat(TokenType.VAR)
             while (this.currentToken.type === TokenType.ID) {
@@ -68,7 +73,65 @@ class Parser {
                 this.eat(TokenType.SEMI)
             }
         }
+
+        // Procedure Declarations
+        while (this.currentToken.type === TokenType.PROCEDURE) {
+            this.eat(TokenType.PROCEDURE)
+            const procName = this.currentToken.value
+            this.eat(TokenType.ID)
+
+            // Get parameters
+            let params = []
+            if (this.currentToken.type === TokenType.LPR) {
+                this.eat(TokenType.LPR)
+                params = this.formal_parameter_list()
+                this.eat(TokenType.RPR)
+            }
+
+            this.eat(TokenType.SEMI)
+            const procBlock = this.block()
+            this.eat(TokenType.SEMI)
+            declarations.push(new ProcedureDecl(procName, params, procBlock))
+        }
+
         return declarations
+    }
+
+    formal_parameter_list() {
+
+        if (this.currentToken.type === TokenType.RPR) {
+            return []
+        }
+
+        let params = this.formal_parameters()
+
+        while (this.currentToken.type === TokenType.SEMI) {
+            this.eat(TokenType.SEMI)
+            params = params.concat(this.formal_parameter_list())
+        }
+
+        return params
+    }
+
+    formal_parameters() {
+        let paramNodes = []
+
+        let paramTokens = [this.currentToken]
+        this.eat(TokenType.ID)
+        while (this.currentToken.type === TokenType.COMMA) {
+            this.eat(TokenType.COMMA)
+            paramTokens.push(this.currentToken)
+            this.eat(TokenType.ID)
+        }
+
+        this.eat(TokenType.COLON)
+
+        let typeNode = this.type_spec()
+        for (let i in paramTokens) {
+            paramNodes.push(new Param(new Var(paramTokens[i]), typeNode))
+        }
+
+        return paramNodes
     }
 
     variable_declaration() {

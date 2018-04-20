@@ -11,7 +11,7 @@ class BuiltinTypeSymbol extends Symbol {
     }
 
     toString() {
-        return this.name
+        return `<BuiltinTypeSymbol ${this.name}>`
     }
 }
 
@@ -21,12 +21,24 @@ class VarSymbol extends Symbol {
     }
 
     toString() {
-        return `<${this.name}:${this.type}>`
+        return `<VarSymbol ${this.name}: ${this.type.name}>`
+    }
+}
+
+class ProcedureSymbol extends Symbol {
+    constructor(name, params) {
+        super(name)
+        this.params = params || []
+    }
+
+    toString() {
+        return `<ProcedureSymbol ${this.name} (${this.params.join(', ')})>`
     }
 }
 
 module.exports = {
     Symbol,
     BuiltinTypeSymbol,
-    VarSymbol
+    VarSymbol,
+    ProcedureSymbol
 }

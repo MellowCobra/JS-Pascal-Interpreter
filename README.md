@@ -15,5 +15,5 @@ Most errors are caught by the lexer and the parser. Feel free to open up an issu
 * Run the REPL with `node repl.js`
 * Ask the REPL what it can do with `help`.
 * Exit the REPL with `quit`
-## Or
+Or
 * Interpret a .pas program file with `node main.js <filename.pas>`

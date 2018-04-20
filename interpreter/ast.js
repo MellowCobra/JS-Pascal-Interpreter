@@ -89,6 +89,23 @@ class Type extends Node {
     }
 }
 
+class ProcedureDecl extends Node {
+    constructor(name, params, blockNode) {
+        super()
+        this.procName = name
+        this.params = params
+        this.blockNode = blockNode
+    }
+}
+
+class Param extends Node {
+    constructor(varNode, typeNode) {
+        super()
+        this.varNode = varNode
+        this.typeNode = typeNode
+    }
+}
+
 module.exports = {
     Node,
     BinOp,
@@ -101,5 +118,7 @@ module.exports = {
     Program,
     Block,
     VarDecl,
-    Type
+    Type,
+    ProcedureDecl,
+    Param
 }

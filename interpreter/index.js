@@ -10,14 +10,16 @@ const {
     Program,
     Block,
     VarDecl,
-    Type
+    Type,
+    ProcedureDecl
 } = require('./ast')
 const {
     Symbol,
     BuiltinTypeSymbol,
-    VarSymbol
+    VarSymbol,
+    ProcedureSymbol
 } = require('./symbol')
-const SymbolTable = require('./symbolTable')
+const ScopedSymbolTable = require('./symbolTable')
 const Parser = require('./parser')
 const Token = require('./token')
 const TokenType = require('./tokenType')
@@ -48,6 +50,8 @@ class NodeVisitor {
             return this.visit_VarDecl(node)
         } else if (node instanceof Type) {
             return this.visit_Type(node)
+        } else if (node instanceof ProcedureDecl) {
+            return this.visit_ProcedureDecl(node)
         } else {
             throw new Error(`No visit_{} method for node ${JSON.stringify(node)}`)
         }
@@ -110,7 +114,7 @@ class Interpreter extends NodeVisitor {
     visit_Var(node) {
         let varName = node.value
         if (this.GLOBAL_SCOPE[varName] == undefined ) {
-            throw new Error(`No variable ${varName} defined`)
+            throw new Error(`Attempting to use variable "${varName}" without initializing`)
         }
 
         return this.GLOBAL_SCOPE[varName]
@@ -138,12 +142,16 @@ class Interpreter extends NodeVisitor {
     visit_Type(node) {
         return
     }
+
+    visit_ProcedureDecl(node) {
+        return
+    }
 }
 
-class SymbolTableBuilder extends NodeVisitor {
+class SemanticAnalyzer extends NodeVisitor {
     constructor() {
         super()
-        this.symbolTable = new SymbolTable()
+        this.currentScope = null
     }
 
     visit_Block(node) {
@@ -154,7 +162,15 @@ class SymbolTableBuilder extends NodeVisitor {
     }
 
     visit_Program(node) {
+        console.log("ENTER scope: global")
+        const globalScope = new ScopedSymbolTable("global", 1, this.currentScope)
+        this.currentScope = globalScope
+
         this.visit(node.block)
+
+        console.log(globalScope.toString())
+        this.currentScope = this.currentScope.enclosingScope
+        console.log("LEAVE scope: global")
     }
 
     visit_BinOp(node) {
@@ -181,25 +197,30 @@ class SymbolTableBuilder extends NodeVisitor {
     }
 
     visit_VarDecl(node) {
+        // Type info
         const typeName = node.typeNode.value
-        const typeSymbol = this.symbolTable.lookup(typeName)
+        const typeSymbol = this.currentScope.lookup(typeName)
+
+        // Var info
         const varName = node.varNode.value
         const varSymbol = new VarSymbol(varName, typeSymbol)
-        this.symbolTable.define(varSymbol)
+
+        if (this.currentScope.contains(varName)) {
+            // Variable already defined!
+            throw new Error(`Attempting to redefine identifier "${varName}"`)
+        }
+
+        this.currentScope.define(varSymbol)
     }
 
     visit_Assign(node) {
-        const varName = node.left.value
-        const varSymbol = this.symbolTable.lookup(varName)
-        if (varSymbol == null) {
-            throw new Error(`No variable "${varName}" defined`)
-        }
+        this.visit(node.left)
         this.visit(node.right)
     }
 
     visit_Var(node) {
         const varName = node.value
-        const varSymbol = this.symbolTable.lookup(varName)
+        const varSymbol = this.currentScope.lookup(varName)
         if (varSymbol == null) {
             throw new Error(`No variable "${varName}" defined`)
         }
@@ -208,9 +229,31 @@ class SymbolTableBuilder extends NodeVisitor {
     visit_Type(node) {
         return
     }
+
+    visit_ProcedureDecl(node) {
+        const procName = node.procName
+        const procSymbol = new ProcedureSymbol(procName)
+        this.currentScope.define(procSymbol)
+
+        console.log(`ENTER scope: ${procName}`)
+        const procScope = new ScopedSymbolTable(procName, this.currentScope.scopeLevel + 1, this.currentScope)
+        this.currentScope = procScope
+
+        for (let param of node.params) {
+            const paramType = this.currentScope.lookup(param.typeNode.value)
+            const paramName = param.varNode.value
+            const varSymbol = new VarSymbol(paramName, paramType)
+            this.currentScope.define(varSymbol)
+            procSymbol.params.push(varSymbol)
+        }
+
+        this.visit(node.blockNode)
+        console.log(procScope.toString())
+        console.log(`LEAVING scope: ${procName}`)
+    }
 }
 
 module.exports = {
     Interpreter,
-    SymbolTableBuilder
+    SemanticAnalyzer
 }
