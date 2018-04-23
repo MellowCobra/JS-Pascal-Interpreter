@@ -19,5 +19,6 @@
   "bugs": {
     "url": "https://github.com/MellowCobra/JS-Pascal-Interpreter/issues"
   },
-  "homepage": "https://github.com/MellowCobra/JS-Pascal-Interpreter#readme"
+  "homepage": "https://github.com/MellowCobra/JS-Pascal-Interpreter#readme",
+  "readme": "./README.md"
 }
